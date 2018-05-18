@@ -26,9 +26,7 @@ defmodule Lab3.RateLimitedConsumer do
   end
 
   def handle_events(events, from, producers) do
-    # TODO: Bump the amount of pending events for the given producer.
-    # ...
-
+    producers = Map.put(producers, from, producers[from] + length(events))
     # Consume the events.
     Enum.each(events, &process_event/1)
 
@@ -44,7 +42,15 @@ defmodule Lab3.RateLimitedConsumer do
   # Should ask the producer ("from") for mode demand with GenStage.ask/2, and schedule the next
   # time it should ask.
   defp ask_and_schedule(producers, from) do
-    raise "not implemented yet"
+    case producers do
+      %{^from => pending} ->
+        GenStage.ask(from, pending)
+        Process.send_after(self(), {:ask, from}, @interval)
+        Map.put(producers, from, 0)
+
+      %{} ->
+        producers
+    end
   end
 
   defp process_event(event) do

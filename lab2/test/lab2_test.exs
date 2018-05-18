@@ -3,7 +3,6 @@ defmodule Lab2.StreamsTest do
 
   @pride_and_prejudice Path.join(__DIR__, "../../pride-and-prejudice.txt")
 
-  @tag :skip
   test "counting words" do
     count = Lab2.Streams.count_words_until_stop_word(@pride_and_prejudice, "amusement")
 
@@ -14,7 +13,6 @@ defmodule Lab2.StreamsTest do
     refute Map.has_key?(count, "amusement")
   end
 
-  @tag :skip
   test "take_while/2" do
     stream = Lab2.Streams.take_while(1..1000, &(&1 <= 5))
     assert Enum.to_list(stream) == [1, 2, 3, 4, 5]
@@ -29,12 +27,10 @@ defmodule Lab2.StreamsTest do
     assert Lab2.Streams.take_while(stream, &(&1 < 11)) |> Enum.to_list() == [6, 7, 8, 9, 10]
   end
 
-  @tag :skip
   test "uniq/1" do
     assert Lab2.Streams.uniq([1, 2, 3, 2, 1]) |> Enum.to_list() == [1, 2, 3]
   end
 
-  @tag :skip
   test "dedup/1" do
     assert Lab2.Streams.dedup([1, 1, 2, 1, 1, 2, 1]) |> Enum.to_list() == [1, 2, 1, 2, 1]
     assert Lab2.Streams.dedup([2, 1, 1, 2, 1]) |> Enum.to_list() == [2, 1, 2, 1]
@@ -52,7 +48,6 @@ end
 defmodule Lab2.TasksTest do
   use ExUnit.Case
 
-  @tag :skip
   test "pmap/2" do
     {time_in_microsec, result} =
       :timer.tc(fn ->
@@ -67,20 +62,17 @@ defmodule Lab2.TasksTest do
   end
 
   describe "async/await" do
-    @tag :skip
     test "when everything goes fine" do
       async = Lab2.Tasks.async(fn -> 1 + 10 end)
       assert Lab2.Tasks.await(async) == {:ok, 11}
     end
 
-    @tag :skip
     @tag :capture_log
     test "when the process crashes" do
       async = Lab2.Tasks.async(fn -> raise "nope!" end)
       assert Lab2.Tasks.await(async) == :error
     end
 
-    @tag :skip
     test "no messages are leaked" do
       async = Lab2.Tasks.async(fn -> 1 + 10 end)
       assert Lab2.Tasks.await(async) == {:ok, 11}
@@ -88,7 +80,6 @@ defmodule Lab2.TasksTest do
     end
   end
 
-  @tag :skip
   test "sum_all/1" do
     refute is_list(Lab2.Tasks.sum_all([1..2]))
 

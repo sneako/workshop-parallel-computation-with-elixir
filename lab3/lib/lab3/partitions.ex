@@ -6,7 +6,8 @@ defmodule Lab3.InvoiceProducer do
   end
 
   def init(regions) do
-    raise "not implemented yet"
+    dispatcher = {GenStage.PartitionDispatcher, partitions: regions, hash: &({&1, &1.region})}
+    {:producer, regions, dispatcher: dispatcher}
   end
 
   def handle_demand(demand, regions) do

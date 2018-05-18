@@ -13,7 +13,8 @@ defmodule Lab2.Tasks do
   """
   @spec pmap(Enumerable.t(), (a -> b)) :: Enumerable.t() when a: term(), b: term()
   def pmap(enum, fun) when is_function(fun, 1) do
-    raise "not implenented yet"
+    Task.async_stream(enum, fn i -> fun.(i) end)
+    |> Enum.map(fn {:ok, val} -> val end)
   end
 
   @doc """
@@ -27,7 +28,8 @@ defmodule Lab2.Tasks do
   """
   @spec sum_all(Enumerable.t()) :: Enumerable.t()
   def sum_all(stream_of_enums) do
-    raise "not implemented yet"
+    Task.async_stream(stream_of_enums, fn i -> Enum.sum(i) end)
+    |> Stream.map(fn {:ok, val} -> val end)
   end
 
   @doc """
@@ -43,7 +45,11 @@ defmodule Lab2.Tasks do
   """
   @spec async((() -> term())) :: term()
   def async(fun) when is_function(fun, 0) do
-    raise "not implemented yet"
+    caller = self()
+    ref = make_ref()
+
+    {_pid, mon_ref} = spawn_monitor(fn -> send(caller, {ref, fun.()}) end)
+    {ref, mon_ref}
   end
 
   @doc """
@@ -67,7 +73,14 @@ defmodule Lab2.Tasks do
 
   """
   @spec await(term()) :: term()
-  def await(task) do
-    raise "not implemented yet"
+  def await({ref, mon_ref}) do
+    receive do
+      {^ref, val} ->
+        Process.demonitor(mon_ref, [:flush])
+        {:ok, val}
+
+      _other ->
+        :error
+    end
   end
 end

@@ -24,7 +24,6 @@ defmodule Lab3.PartitionDispatcherTest do
     end
   end
 
-  @tag :skip
   test "partition dispatcher" do
     regions = [:us, :eu, :asia]
 
@@ -63,7 +62,6 @@ defmodule Lab3.RateLimitedConsumerTest do
     end
   end
 
-  @tag :skip
   test "rate limiting" do
     {:ok, producer} = GenStage.start_link(Producer, nil)
     {:ok, consumer} = GenStage.start_link(Lab3.RateLimitedConsumer, nil)

@@ -25,8 +25,20 @@ defmodule Lab2.Streams do
 
   """
   @spec count_words_until_stop_word(Path.t(), String.t()) :: %{String.t() => pos_integer()}
-  def count_words_until_stop_word(_file_path, _stop_word) do
-    raise normalize_string("not implemented yet")
+  def count_words_until_stop_word(file_path, stop_word) do
+    File.stream!(file_path)
+    |> Stream.map(&normalize_string/1)
+    |> Stream.take_while(&not(String.contains?(&1, stop_word)))
+    |> Stream.flat_map(&String.split/1)
+    |> Enum.reduce(%{}, fn word, acc ->
+      case acc do
+        %{^word => count} = counts ->
+          Map.put(counts, word, count + 1)
+
+        counts ->
+          Map.put(counts, word, 1)
+      end
+    end)
   end
 
   defp normalize_string(string) do
@@ -49,7 +61,12 @@ defmodule Lab2.Streams do
   """
   @spec take_while(Enumerable.t(), (term() -> boolean())) :: Enumerable.t()
   def take_while(enum, predicate) do
-    raise "not implemented yet"
+    Stream.transform(enum, nil, fn val, nil ->
+      case predicate.(val) do
+        true -> {[val], nil}
+        false -> {:halt, nil}
+      end
+    end)
   end
 
   @doc """
@@ -64,7 +81,11 @@ defmodule Lab2.Streams do
   """
   @spec dedup(Enumerable.t()) :: Enumerable.t()
   def dedup(enum) do
-    raise "not implemented yet"
+    Stream.transform(enum, :none, fn
+      elem, :none -> {[elem], {:previous, elem}}
+      elem, {:previous, elem} -> {[], {:previous, elem}}
+      elem, {:previous, _} -> {[elem], {:previous, elem}}
+    end)
   end
 
   @doc """
@@ -79,6 +100,12 @@ defmodule Lab2.Streams do
   """
   @spec uniq(Enumerable.t()) :: Enumerable.t()
   def uniq(enum) do
-    raise "not implemented yet"
+    Stream.transform(enum, MapSet.new, fn val, acc ->
+      if val in acc do
+        {[], acc}
+      else
+        {[val], MapSet.put(acc, val)}
+      end
+    end)
   end
 end
